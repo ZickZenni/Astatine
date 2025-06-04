@@ -3,14 +3,14 @@
 #include <windows.h>
 
 /**
- * Represents an internal cheat for the AssaultCube game. This class manages
+ * Represents an internal cheat for the Assault Cube game. This class manages
  * initialization, execution, and cleanup of the cheat's functionalities.
  */
-class AssaultCheat {
+class Astatine {
 public:
-    explicit AssaultCheat(HMODULE module);
+    explicit Astatine(HMODULE module);
 
-    ~AssaultCheat();
+    ~Astatine();
 
     /**
      * Executes the main routine of the AssaultCheat instance by initializing the necessary resources,
@@ -91,10 +91,10 @@ public:
      *
      * @return A pointer to the singleton instance of AssaultCheat.
      */
-    static AssaultCheat* get();
+    static Astatine* get();
 
 private:
-    static AssaultCheat* s_instance;
+    static Astatine* s_instance;
 
 private:
     /**

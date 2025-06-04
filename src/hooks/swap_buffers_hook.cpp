@@ -1,6 +1,6 @@
 #include "../logger.h"
 
-#include "../assault.h"
+#include "../astatine.h"
 #include "../renderer.h"
 #include "backends/imgui_impl_win32.h"
 #include "hooks_manager.h"
@@ -10,7 +10,7 @@ long long* HooksManager::Hooks::wglSwapBuffers(const HDC hdc)
     /*
      * Shutdown renderer if the cheats should shut down.
      */
-    if (AssaultCheat::get()->should_shutdown()) {
+    if (Astatine::get()->should_shutdown()) {
         if (Renderer::get().is_initialized()) {
             Renderer::get().shutdown();
             LOG_INFO("Renderer shutdown.");
@@ -22,7 +22,7 @@ long long* HooksManager::Hooks::wglSwapBuffers(const HDC hdc)
      * Initialize the renderer when not already.
      */
     if (!Renderer::get().is_initialized()) {
-        Renderer::get().initialize(AssaultCheat::get()->get_hwnd());
+        Renderer::get().initialize(Astatine::get()->get_hwnd());
         LOG_INFO("Renderer initialized.");
     }
 

@@ -20,6 +20,7 @@ class Logger {
      */
 public:
     enum class LogLevel {
+        RAW,
         INFO,
         WARN,
         ERR,
@@ -44,6 +45,12 @@ public:
      * are properly released, including closing the stream and freeing the console.
      */
     void shutdown();
+
+    template<typename... args_t>
+    void raw(const std::string_view fmt, args_t&&... args)
+    {
+        log(LogLevel::RAW, fmt, args...);
+    }
 
     template<typename... args_t>
     void info(const std::string_view fmt, args_t&&... args)
@@ -87,7 +94,7 @@ public:
      * The log level indicates the severity or purpose of the message.
      *
      * @param level The severity level of the message to log. This determines the log level prefix
-     *              (e.g., INFO, WARN, ERR, CRIT, DEBUG).
+     *              (e.g., RAW, INFO, WARN, ERR, CRIT, DEBUG).
      * @param msg   The message content to log. This should be a preformatted or plain text string.
      */
     void log(LogLevel level, const std::string& msg);
@@ -107,6 +114,7 @@ private:
     bool m_console_exists = false;
 };
 
+#define LOG_RAW(message, ...) Logger::get().raw(message, __VA_ARGS__)
 #define LOG_INFO(message, ...) Logger::get().info(message, __VA_ARGS__)
 #define LOG_WARN(message, ...) Logger::get().warn(message, __VA_ARGS__)
 #define LOG_ERROR(message, ...) Logger::get().error(message, __VA_ARGS__)

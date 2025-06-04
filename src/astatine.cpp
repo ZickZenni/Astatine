@@ -1,32 +1,32 @@
-#include "assault.h"
+#include "astatine.h"
 
 #include "hooks/hooks_manager.h"
 #include "logger.h"
-#include "renderer.h"
-#include "utils/win.h"
+#include "utils/pointer.h"
 
 #include <MinHook.h>
 
 #include <chrono>
 #include <thread>
 
-AssaultCheat* AssaultCheat::s_instance = nullptr;
+Astatine* Astatine::s_instance = nullptr;
 
-AssaultCheat::AssaultCheat(const HMODULE module)
+Astatine::Astatine(const HMODULE module)
 {
     m_hwnd = nullptr;
     m_module = module;
     m_thread = GetCurrentThread();
+    m_running = false;
     s_instance = this;
 }
 
-AssaultCheat::~AssaultCheat()
+Astatine::~Astatine()
 {
     Logger::get().shutdown();
     s_instance = nullptr;
 }
 
-bool AssaultCheat::run()
+bool Astatine::run()
 {
     if (m_running) {
         return false;
@@ -52,29 +52,39 @@ bool AssaultCheat::run()
     return shutdown();
 }
 
-void AssaultCheat::request_shutdown()
+void Astatine::request_shutdown()
 {
     m_running = false;
 }
 
-HWND AssaultCheat::get_hwnd() const
+HWND Astatine::get_hwnd() const
 {
     return m_hwnd;
 }
 
-HMODULE AssaultCheat::get_module() const
+HMODULE Astatine::get_module() const
 {
     return m_module;
 }
 
-HANDLE AssaultCheat::get_thread() const
+HANDLE Astatine::get_thread() const
 {
     return m_thread;
 }
 
-bool AssaultCheat::initialize()
+bool Astatine::initialize()
 {
     Logger::get().initialize(true);
+
+    LOG_RAW(R"(
+    ░▒▓██████▓▒░ ░▒▓███████▓▒░▒▓████████▓▒░▒▓██████▓▒░▒▓████████▓▒░▒▓█▓▒░▒▓███████▓▒░░▒▓████████▓▒░
+   ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░         ░▒▓█▓▒░  ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░   ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░
+   ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░         ░▒▓█▓▒░  ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░   ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░
+   ░▒▓████████▓▒░░▒▓██████▓▒░   ░▒▓█▓▒░  ░▒▓████████▓▒░ ░▒▓█▓▒░   ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓██████▓▒░
+   ░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░  ░▒▓█▓▒░  ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░   ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░
+   ░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░  ░▒▓█▓▒░  ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░   ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░
+   ░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░   ░▒▓█▓▒░  ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░   ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░
+)");
 
     if (MH_Initialize() != MH_OK) {
         LOG_CRIT("Failed to initialize MinHook");
@@ -90,14 +100,15 @@ bool AssaultCheat::initialize()
         return false;
     }
 
-    LOG_DEBUG("Found HWND: {}", hwnd_to_hex(m_hwnd));
+    LOG_DEBUG("Found HWND: {}", ptrthex(m_hwnd));
 
     HooksManager::get().initialize();
     HooksManager::get().enable();
     return true;
 }
 
-bool AssaultCheat::shutdown()
+// ReSharper disable once CppDFAUnreachableFunctionCall
+bool Astatine::shutdown()
 {
     HooksManager::get().disable();
     HooksManager::get().shutdown();
@@ -114,17 +125,17 @@ bool AssaultCheat::shutdown()
     return true;
 }
 
-bool AssaultCheat::should_shutdown() const
+bool Astatine::should_shutdown() const
 {
     return !m_running;
 }
 
-AssaultCheat* AssaultCheat::get()
+Astatine* Astatine::get()
 {
     return s_instance;
 }
 
-HWND AssaultCheat::find_window()
+HWND Astatine::find_window()
 {
     for (HWND hwnd = GetTopWindow(nullptr); hwnd != nullptr; hwnd = GetNextWindow(hwnd, GW_HWNDNEXT)) {
         if (!IsWindowVisible(hwnd)) {

@@ -1,4 +1,4 @@
-#include "../assault.h"
+#include "../astatine.h"
 #include "../logger.h"
 #include "../renderer.h"
 #include "hooks_manager.h"
@@ -11,7 +11,7 @@ LRESULT HooksManager::Hooks::wndproc(const HWND hwnd, const UINT msg, const WPAR
             Renderer::get().mMenuOpen = !Renderer::get().mMenuOpen;
         }
         if (wparam == VK_F8) {
-            AssaultCheat::get()->request_shutdown();
+            Astatine::get()->request_shutdown();
         }
         break;
     }

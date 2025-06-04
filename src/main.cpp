@@ -1,5 +1,5 @@
 #include "MinHook.h"
-#include "assault.h"
+#include "astatine.h"
 
 #include <iostream>
 #include <thread>
@@ -10,7 +10,7 @@ BOOL APIENTRY DllMain(const HMODULE module, const DWORD reason, PVOID)
     if (reason == DLL_PROCESS_ATTACH) {
         DisableThreadLibraryCalls(module);
         CreateThread(nullptr, 0, [](const PVOID info) -> DWORD {
-            auto* assault = new AssaultCheat(static_cast<HMODULE>(info));
+            auto* assault = new Astatine(static_cast<HMODULE>(info));
 
             const auto state = assault->run();
             const auto module = assault->get_module();
