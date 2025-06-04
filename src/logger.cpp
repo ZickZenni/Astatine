@@ -17,12 +17,18 @@ void Logger::initialize(const bool alloc_console)
             SetConsoleTitleA("Astatine");
             SetConsoleOutputCP(CP_UTF8);
 
+            /*
+             * Enable ASCII escape colors.
+             */
             DWORD consoleMode;
             GetConsoleMode(handle, &consoleMode);
             consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
             consoleMode |= DISABLE_NEWLINE_AUTO_RETURN;
             SetConsoleMode(handle, consoleMode);
 
+            /*
+             * Open a stream through we can use the standard std::cout to print messages to the newly allocated console.
+             */
             freopen_s(&m_console_stream, "CONOUT$", "w", stdout);
             m_console_exists = true;
         }

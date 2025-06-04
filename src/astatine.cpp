@@ -74,6 +74,9 @@ HANDLE Astatine::get_thread() const
 
 bool Astatine::initialize()
 {
+    /*
+     * Initialize the logger (+ with a console allocated)
+     */
     Logger::get().initialize(true);
 
     LOG_RAW(R"(
@@ -86,6 +89,9 @@ bool Astatine::initialize()
    ░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░   ░▒▓█▓▒░  ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░   ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░
 )");
 
+    /*
+     * Initialize MinHook.
+     */
     if (MH_Initialize() != MH_OK) {
         LOG_CRIT("Failed to initialize MinHook");
         std::this_thread::sleep_for(std::chrono::seconds(3));
@@ -94,6 +100,9 @@ bool Astatine::initialize()
 
     LOG_INFO("MinHook initialized.");
 
+    /*
+     * Find the game's hwnd.
+     */
     if ((m_hwnd = find_window()) == nullptr) {
         LOG_CRIT("Failed to find game window");
         std::this_thread::sleep_for(std::chrono::seconds(3));
@@ -102,6 +111,9 @@ bool Astatine::initialize()
 
     LOG_DEBUG("Found HWND: {}", ptrthex(m_hwnd));
 
+    /*
+     * Initialize all hooks and enable them.
+     */
     HooksManager::get().initialize();
     HooksManager::get().enable();
     return true;
@@ -110,9 +122,15 @@ bool Astatine::initialize()
 // ReSharper disable once CppDFAUnreachableFunctionCall
 bool Astatine::shutdown()
 {
+    /*
+     * Disable and shut down all hooks.
+     */
     HooksManager::get().disable();
     HooksManager::get().shutdown();
 
+    /*
+     * Uninitialize MinHook.
+     */
     if (MH_Uninitialize() != MH_OK) {
         LOG_CRIT("Failed to uninitialize MinHook");
         std::this_thread::sleep_for(std::chrono::seconds(3));
@@ -121,6 +139,9 @@ bool Astatine::shutdown()
 
     LOG_INFO("MinHook shutdown.");
 
+    /*
+     * Shutdown the logger.
+     */
     Logger::get().shutdown();
     return true;
 }
@@ -137,6 +158,11 @@ Astatine* Astatine::get()
 
 HWND Astatine::find_window()
 {
+    /*
+     * Somehow using FindWindow with "SDL_app" and "AssaultCube" does not work.
+     * This works and could be obviously better, but it's only run one time at the start,
+     * so it's okay.
+     */
     for (HWND hwnd = GetTopWindow(nullptr); hwnd != nullptr; hwnd = GetNextWindow(hwnd, GW_HWNDNEXT)) {
         if (!IsWindowVisible(hwnd)) {
             continue;

@@ -5,7 +5,7 @@
 #include "backends/imgui_impl_win32.h"
 #include "hooks_manager.h"
 
-long long* HooksManager::Hooks::wglSwapBuffers(const HDC hdc)
+long long* HooksManager::Definitions::wglSwapBuffers(const HDC hdc)
 {
     /*
      * Shutdown renderer if the cheats should shut down.

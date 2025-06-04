@@ -3,7 +3,7 @@
 #include "../renderer.h"
 #include "hooks_manager.h"
 
-LRESULT HooksManager::Hooks::wndproc(const HWND hwnd, const UINT msg, const WPARAM wparam, const LPARAM lparam)
+LRESULT HooksManager::Definitions::wndproc(const HWND hwnd, const UINT msg, const WPARAM wparam, const LPARAM lparam)
 {
     switch (msg) {
     case WM_KEYDOWN: {

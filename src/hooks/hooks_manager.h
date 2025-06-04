@@ -10,21 +10,33 @@
  */
 class HooksManager {
 public:
-    class Hooks {
+    class Definitions {
     public:
-        Hooks() = delete;
+        Definitions() = delete;
 
         static LRESULT wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
         static long long* wglSwapBuffers(HDC hdc);
     };
 
 public:
+    /**
+     * Initializes hooks and detours used in Astatine.
+     */
     void initialize();
 
+    /**
+     * Safely releases and disables all active hooks.
+     */
     void shutdown();
 
+    /**
+     * Enables all hooks.
+     */
     void enable();
 
+    /**
+     * Disables all hooks.
+     */
     void disable();
 
 public:
@@ -38,9 +50,9 @@ public:
 
 private:
     DetourHook* m_swap_buffers_hook = nullptr;
-    WNDPROC m_og_wndproc;
+    WNDPROC m_og_wndproc = nullptr;
 
-    friend Hooks;
+    friend Definitions;
 
 private:
     /**

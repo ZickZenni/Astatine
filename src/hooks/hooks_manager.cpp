@@ -6,12 +6,12 @@
 
 void HooksManager::initialize()
 {
-    m_og_wndproc = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(Astatine::get()->get_hwnd(), GWLP_WNDPROC, reinterpret_cast<LONG>(&Hooks::wndproc)));
-    LOG_DEBUG("HooksManager::initialize(): WndProc Original: {} Detour: {}", ptrthex(m_og_wndproc),  ptrthex(&Hooks::wndproc));
+    m_og_wndproc = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(Astatine::get()->get_hwnd(), GWLP_WNDPROC, reinterpret_cast<LONG>(&Definitions::wndproc)));
+    LOG_DEBUG("HooksManager::initialize(): WndProc Original: {} Detour: {}", ptrthex(m_og_wndproc),  ptrthex(&Definitions::wndproc));
 
     {
         const auto target = get_proc_address("opengl32.dll", "wglSwapBuffers");
-        const auto detour = &Hooks::wglSwapBuffers;
+        const auto detour = &Definitions::wglSwapBuffers;
 
         m_swap_buffers_hook = new DetourHook(target, detour);
         LOG_DEBUG("HooksManager::initialize(): SwapBuffers Original: {} Detour: {}", ptrthex(target), ptrthex(detour));
