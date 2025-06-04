@@ -1,6 +1,8 @@
 #include "assault.h"
 
+#include "hooks/hooks_manager.h"
 #include "logger.h"
+#include "renderer.h"
 #include "utils/win.h"
 
 #include <MinHook.h>
@@ -8,27 +10,56 @@
 #include <chrono>
 #include <thread>
 
+AssaultCheat* AssaultCheat::s_instance = nullptr;
+
 AssaultCheat::AssaultCheat(const HMODULE module)
 {
-    m_window = nullptr;
+    m_hwnd = nullptr;
     m_module = module;
     m_thread = GetCurrentThread();
+    s_instance = this;
 }
 
 AssaultCheat::~AssaultCheat()
 {
     Logger::get().shutdown();
+    s_instance = nullptr;
 }
 
 bool AssaultCheat::run()
 {
+    if (m_running) {
+        return false;
+    }
+
     if (!initialize()) {
         return false;
     }
 
-    INFO("AssaultCube Internal Cheat enabled.");
+    LOG_INFO("Initialization complete.");
+
+    m_running = true;
+
+    // ReSharper disable once CppDFAConstantConditions
+    // ReSharper disable once CppDFAEndlessLoop
+    while (m_running) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    LOG_INFO("Shutting down..");
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 
     return shutdown();
+}
+
+void AssaultCheat::request_shutdown()
+{
+    m_running = false;
+}
+
+HWND AssaultCheat::get_hwnd() const
+{
+    return m_hwnd;
 }
 
 HMODULE AssaultCheat::get_module() const
@@ -46,32 +77,51 @@ bool AssaultCheat::initialize()
     Logger::get().initialize(true);
 
     if (MH_Initialize() != MH_OK) {
-        INFO("Failed to initialize MinHook");
+        LOG_CRIT("Failed to initialize MinHook");
         std::this_thread::sleep_for(std::chrono::seconds(3));
         return false;
     }
 
-    if ((m_window = find_window()) == nullptr) {
-        INFO("Failed to find game window");
+    LOG_INFO("MinHook initialized.");
+
+    if ((m_hwnd = find_window()) == nullptr) {
+        LOG_CRIT("Failed to find game window");
         std::this_thread::sleep_for(std::chrono::seconds(3));
         return false;
     }
 
-    INFO("Game Window HWND: {}", hwnd_to_hex(m_window));
+    LOG_DEBUG("Found HWND: {}", hwnd_to_hex(m_hwnd));
+
+    HooksManager::get().initialize();
+    HooksManager::get().enable();
     return true;
 }
 
 bool AssaultCheat::shutdown()
 {
-    Logger::get().shutdown();
+    HooksManager::get().disable();
+    HooksManager::get().shutdown();
 
     if (MH_Uninitialize() != MH_OK) {
-        INFO("Failed to uninitialize MinHook");
+        LOG_CRIT("Failed to uninitialize MinHook");
         std::this_thread::sleep_for(std::chrono::seconds(3));
         return false;
     }
 
+    LOG_INFO("MinHook shutdown.");
+
+    Logger::get().shutdown();
     return true;
+}
+
+bool AssaultCheat::should_shutdown() const
+{
+    return !m_running;
+}
+
+AssaultCheat* AssaultCheat::get()
+{
+    return s_instance;
 }
 
 HWND AssaultCheat::find_window()

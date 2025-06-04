@@ -1,6 +1,8 @@
 #include "logger.h"
 
+#include <chrono>
 #include <cstdio>
+#include <iomanip>
 #include <iostream>
 #include <ostream>
 #include <windows.h>
@@ -31,9 +33,31 @@ void Logger::shutdown()
     }
 }
 
-void Logger::info(const std::string& msg)
+void Logger::log(LogLevel level, const std::string& msg)
 {
-    std::cout << msg << std::endl;
+    std::string level_str = "UNKNOWN";
+    switch (level) {
+    case LogLevel::INFO:
+        level_str = "INFO";
+        break;
+    case LogLevel::WARN:
+        level_str = "WARN";
+        break;
+    case LogLevel::ERR:
+        level_str = "ERROR";
+        break;
+    case LogLevel::CRIT:
+        level_str = "CRIT";
+        break;
+    case LogLevel::DEBUG:
+        level_str = "DEBUG";
+        break;
+    default:
+        break;
+    }
+
+    const std::string formatted_message = std::format("[{}] {}", level_str, msg);
+    std::cout << formatted_message << std::endl;
 }
 
 Logger& Logger::get()

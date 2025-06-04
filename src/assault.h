@@ -22,6 +22,19 @@ public:
     bool run();
 
     /**
+     * Signals the AssaultCheat instance to initiate its shutdown sequence. This method
+     * sets the internal state of the cheat to indicate that it should stop running.
+     */
+    void request_shutdown();
+
+    /**
+     * Retrieves the handle to the main window associated with the AssaultCheat instance.
+     *
+     * @return A handle to the window (HWND) managed by this instance.
+     */
+    [[nodiscard]] HWND get_hwnd() const;
+
+    /**
      * Retrieves the module handle associated with this instance of AssaultCheat.
      *
      * @return The handle to the module (HMODULE) that this instance is associated with.
@@ -35,10 +48,21 @@ public:
      */
     [[nodiscard]] HANDLE get_thread() const;
 
+    /**
+     * Checks whether the AssaultCheat instance is flagged for shutdown.
+     * This method evaluates the internal state to determine if the
+     * shutdown process should be initiated.
+     *
+     * @return A boolean indicating the shutdown status. Returns true
+     *         if the cheat is set to shut down, or false otherwise.
+     */
+    [[nodiscard]] bool should_shutdown() const;
+
 private:
-    HWND m_window;
+    HWND m_hwnd;
     HMODULE m_module;
     HANDLE m_thread;
+    bool m_running;
 
 private:
     /**
@@ -60,6 +84,17 @@ private:
      *         if the uninitialization process fails.
      */
     bool shutdown();
+
+public:
+    /**
+     * Provides a global access point to the singleton instance of the AssaultCheat class.
+     *
+     * @return A pointer to the singleton instance of AssaultCheat.
+     */
+    static AssaultCheat* get();
+
+private:
+    static AssaultCheat* s_instance;
 
 private:
     /**
